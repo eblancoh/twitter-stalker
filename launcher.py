@@ -25,18 +25,48 @@ def get_IP():
 
 def main():
 
-	# Leer secuencialmente de la carpea stalked-members
-	# json files directory of memebers of the boards
-	stalked_directory = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'stalked-members')
+	# Check if /stalked-profiles exists. If not, it will be created
+	if os.path.isdir(os.path.join(os.path.dirname(os.path.realpath(__file__) ), 'stalked-profiles')) == False:
+		path = os.path.join(os.path.dirname(os.path.realpath(__file__)),'stalked-profiles')
+		stalked_profiles = os.mkdir(path)
+	else:
+		stalked_profiles = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'stalked-profiles') 
 
-	for filename in os.listdir(stalked_directory):
+	# Check if /stalked-profiles/stalked_chiefs exists. If not, it will be created
+	if os.path.isdir(os.path.join(stalked_profiles, 'stalked_chiefs')) == False:
+		path = os.path.join(stalked_profiles,'stalked_chiefs')
+		stalked_chiefs = os.mkdir(path)
+	else:
+		stalked_chiefs = os.path.join(stalked_profiles, 'stalked_chiefs')
+
+	# Check if /stalked-profiles/stalked_economists exists. If not, it will be created
+	if os.path.isdir(os.path.join(stalked_profiles, 'stalked_economists')) == False:
+		path = os.path.join(stalked_profiles,'stalked_economists')
+		stalked_economists = os.mkdir(path)
+	else:
+		stalked_economists = os.path.join(stalked_profiles, 'stalked_economists')
+
+	# Get each file from /stalked_economists
+	for filename in os.listdir(stalked_economists):
 		if filename.endswith(".json"):
 			logger.info("Reading {} file".format(filename))
-			tweets = TweetsAnalysis().read_json(filename=os.path.join(stalked_directory, filename))
-			TweetsAnalysis().db_complete(response=tweets)
+			tweets = TweetsAnalysis().read_json(filename=os.path.join(stalked_economists, filename))
+			TweetsAnalysis().db_complete(response=tweets, collection='economists')
 		else:
 			print("Only .json files are supported.")
 			pass
+	
+	# Get each file from /stalked_chiefs
+	for filename in os.listdir(stalked_chiefs):
+		if filename.endswith(".json"):
+			logger.info("Reading {} file".format(filename))
+			tweets = TweetsAnalysis().read_json(filename=os.path.join(stalked_chiefs, filename))
+			TweetsAnalysis().db_complete(response=tweets, collection='chiefs')
+		else:
+			print("Only .json files are supported.")
+			pass
+
+	
 
 	logger.info("Finished batch of queries...")
 

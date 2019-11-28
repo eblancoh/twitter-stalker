@@ -21,7 +21,6 @@ import twitter
 from twitter.error import TwitterError
 from t import ACCESS_TOKEN_KEY, ACCESS_TOKEN_SECRET, CONSUMER_KEY, CONSUMER_SECRET
 
-
 def get_tweets(api=None, screen_name=None):
     timeline = api.GetUserTimeline(screen_name=screen_name, count=200)
     earliest_tweet = min(timeline, key=lambda x: x.id).id
@@ -47,14 +46,21 @@ if __name__ == "__main__":
     api = twitter.Api(
         CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN_KEY, ACCESS_TOKEN_SECRET
     )
-    ids = []
+    ids_dir = [] # Ids del comite ejecutivo
+    ids_eco = [] # Ids de los economistas
+
     with open('stalked.json', encoding="utf8") as json_file:
         json_data = json.load(json_file)
+        print("Getting 'EquipoDirectivo' ids...")
         for item in json_data['EquipoDirectivo']:
             if item["username"] != None:
-                ids.append(item["username"])
-         
-    for screen_name in ids:
+                ids_dir.append(item["username"])
+        print("Getting 'Economistas' ids...")
+        for item in json_data['Economistas']:
+            ids_eco.append(item["username"])
+            
+    print("Getting 'EquipoDirectivo' tweets...")
+    for screen_name in ids_dir:
         try:
             timeline = get_tweets(api=api, screen_name=screen_name)
         except (TwitterError, ValueError) as e:
@@ -68,11 +74,25 @@ if __name__ == "__main__":
         basedir = os.path.dirname(os.path.realpath(__file__))
         grandpadir = os.path.dirname(os.path.dirname(basedir))
 
-        # Los vamos moviendo a la carpeta que nos interesa (stalked meme)
-        shutil.move(os.path.join(basedir, screen_name + '.json'), os.path.join(grandpadir, 'stalked-members', screen_name + '.json'))
+        # Los vamos moviendo a la carpeta que nos interesa (../stalked-profiles/stalked_chiefs)
+        shutil.move(os.path.join(basedir, screen_name + '.json'), os.path.join(grandpadir, 'stalked-profiles/stalked_chiefs', screen_name + '.json'))
 
+    print("Getting 'Economistas' tweets...")
+    for screen_name in ids_eco:
+        try:
+            timeline = get_tweets(api=api, screen_name=screen_name)
+        except (TwitterError, ValueError) as e:
+            pass
+
+        with open(screen_name + '.json', 'w+') as f:
+            for tweet in timeline:
+                f.write(json.dumps(tweet._json))
+                f.write('\n')
         
-        
-    
+        basedir = os.path.dirname(os.path.realpath(__file__))
+        grandpadir = os.path.dirname(os.path.dirname(basedir))
+
+        # Los vamos moviendo a la carpeta que nos interesa (../stalked-profiles/stalked_economists)
+        shutil.move(os.path.join(basedir, screen_name + '.json'), os.path.join(grandpadir, 'stalked-profiles/stalked_economists', screen_name + '.json'))
 
     

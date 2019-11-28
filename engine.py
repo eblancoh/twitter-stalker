@@ -26,7 +26,7 @@ class TweetsAnalysis(object):
 		return data
 	
 	@staticmethod
-	def db_complete(response):
+	def db_complete(response, collection):
 		# Nos conectamos a la base de datos en mongodb atlas
 		# client = pymongo.MongoClient("mongodb+srv://holygrail:<password>@database-mxffd.mongodb.net/test?retryWrites=true&w=majority")
 		user = config['mongodb']['user']
@@ -35,7 +35,8 @@ class TweetsAnalysis(object):
 
 		client = pymongo.MongoClient("mongodb+srv://" + user + ":" + password + "@" + db_name + "-mxffd.mongodb.net/test?retryWrites=true&w=majority")
 		db = client.twitter
-		collection = db.stalkercollection
+		collection_stalker = db.stalkercollection
+		collection_economists = db.economistscollection
 
 		# insertamos el contenido de las noticias como documentos en la colección
 		# Lo que nos interesa está almacenado en "value"
@@ -43,19 +44,34 @@ class TweetsAnalysis(object):
 			for j in response:
 				# To check if a certain entrance already exists in database
 				# to avoid duplications in our collection
-				if collection.find({'id': j['id']}).count() == 0:
-					# Incorporamos el lenguaje detectado
-					j['detectedLanguages'] = language(j)
-					# Detectamos sentimiento
-					j['sentiment'] = sentiments(j)
-					# Almacenamos las keyPhrases
-					j['keyPhrases'] = keyPhrases(j)
-					# Almacenamos las entities
-					j['entities'] = entities(j)
-					post_id = collection.insert_one(j).inserted_id
-					logger.info("_id {} document inserted in database".format(post_id))
+				if collection == 'chiefs':
+					if collection_stalker.find({'id': j['id']}).count() == 0:
+						# Incorporamos el lenguaje detectado
+						j['detectedLanguages'] = language(j)
+						# Detectamos sentimiento
+						j['sentiment'] = sentiments(j)
+						# Almacenamos las keyPhrases
+						j['keyPhrases'] = keyPhrases(j)
+						# Almacenamos las entities
+						j['entities'] = entities(j)
+						post_id = collection_stalker.insert_one(j).inserted_id
+						logger.info("_id {} document inserted in database [Collection {}]".format(post_id, collection))
+					else:
+						pass
 				else:
-					pass
+					if collection_economists.find({'id': j['id']}).count() == 0:
+						# Incorporamos el lenguaje detectado
+						j['detectedLanguages'] = language(j)
+						# Detectamos sentimiento
+						j['sentiment'] = sentiments(j)
+						# Almacenamos las keyPhrases
+						j['keyPhrases'] = keyPhrases(j)
+						# Almacenamos las entities
+						j['entities'] = entities(j)
+						post_id = collection_economists.insert_one(j).inserted_id
+						logger.info("_id {} document inserted in database [Collection {}]".format(post_id, collection))
+					else:
+						pass
 		except KeyError:
 			logger.warning("Something went wrong :P")
 			pass
