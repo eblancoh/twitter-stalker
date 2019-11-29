@@ -98,14 +98,10 @@ class WebScrapper:
 def main():
     ws = WebScrapper()
     data = dict()
-    result = list()
 
     data['Expansion'] = ws.expansion_search()
     data['MarketWatch'] = ws.marketwatch_search()
 
-    for d in data:
-        result.append(d)
-    print(data)
     TweetsAnalysis().db_complete(data,"recomendations")
 
 
