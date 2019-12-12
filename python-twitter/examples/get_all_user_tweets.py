@@ -22,22 +22,22 @@ from twitter.error import TwitterError
 from t import ACCESS_TOKEN_KEY, ACCESS_TOKEN_SECRET, CONSUMER_KEY, CONSUMER_SECRET
 
 def get_tweets(api=None, screen_name=None):
-    timeline = api.GetUserTimeline(screen_name=screen_name, count=200)
+    timeline = api.GetUserTimeline(screen_name=screen_name, count=100)
     earliest_tweet = min(timeline, key=lambda x: x.id).id
     print("getting tweets before:", earliest_tweet)
 
-    while True:
-        tweets = api.GetUserTimeline(
-            screen_name=screen_name, max_id=earliest_tweet, count=200
-        )
-        new_earliest = min(tweets, key=lambda x: x.id).id
-
-        if not tweets or new_earliest == earliest_tweet:
-            break
-        else:
-            earliest_tweet = new_earliest
-            print("getting tweets before:", earliest_tweet)
-            timeline += tweets
+    #while True:
+    #    tweets = api.GetUserTimeline(
+    #        screen_name=screen_name, max_id=earliest_tweet, count=200
+    #    )
+    #    new_earliest = min(tweets, key=lambda x: x.id).id
+    #
+    #    if not tweets or new_earliest == earliest_tweet:
+    #        break
+    #    else:
+    #        earliest_tweet = new_earliest
+    #        print("getting tweets before:", earliest_tweet)
+    #        timeline += tweets
 
     return timeline
 
@@ -58,10 +58,16 @@ if __name__ == "__main__":
         print("Getting 'Economistas' ids...")
         for item in json_data['Economistas']:
             ids_eco.append(item["username"])
-            
+
+    # Borramos todos los JSON antiguos
+    basedir = os.path.dirname(os.path.realpath(__file__))
+    grandpadir = os.path.dirname(os.path.dirname(basedir))
+    os.system('rm -rf /stalked-profiles/')
+
     print("Getting 'EquipoDirectivo' tweets...")
     for screen_name in ids_dir:
         try:
+            print(screen_name)
             timeline = get_tweets(api=api, screen_name=screen_name)
         except (TwitterError, ValueError) as e:
             pass

@@ -46,16 +46,6 @@ def main():
 	else:
 		stalked_economists = os.path.join(stalked_profiles, 'stalked_economists')
 
-	# Get each file from /stalked_economists
-	for filename in os.listdir(stalked_economists):
-		if filename.endswith(".json"):
-			logger.info("Reading {} file".format(filename))
-			tweets = TweetsAnalysis().read_json(filename=os.path.join(stalked_economists, filename))
-			TweetsAnalysis().db_complete(response=tweets, collection='economists')
-		else:
-			print("Only .json files are supported.")
-			pass
-	
 	# Get each file from /stalked_chiefs
 	for filename in os.listdir(stalked_chiefs):
 		if filename.endswith(".json"):
@@ -66,29 +56,21 @@ def main():
 			print("Only .json files are supported.")
 			pass
 
+	# Get each file from /stalked_economists
+	for filename in os.listdir(stalked_economists):
+		if filename.endswith(".json"):
+			logger.info("Reading {} file".format(filename))
+			tweets = TweetsAnalysis().read_json(filename=os.path.join(stalked_economists, filename))
+			TweetsAnalysis().db_complete(response=tweets, collection='economists')
+		else:
+			print("Only .json files are supported.")
+			pass
+
 	
 
 	logger.info("Finished batch of queries...")
 
 
 if __name__=='__main__':
-	# Obtain my_ip
-	my_ip=get_IP()
-
-	# Check that we're going out a certain filtered IP by the database
-	if my_ip in filtered_ips.values():
-		# Schedule routine with certain frequency
-		schedule.every(1).minutes.do(main)
-		# schedule.every().hour.do(main)
-		# schedule.every().day.at("12:00").do(main)
-		while True:
-			try:
-				schedule.run_pending()
-				time.sleep(1)
-			except KeyboardInterrupt:
-				sys.exit('Ctrl+c - Routine stopped by user.')
-	
-	else:
-		logger.error("IP address not included in database filtered addresses.")
-		sys.exit('Connect to a network with granted access to the database.')
+	main()
 
