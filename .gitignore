@@ -1,4 +1,5 @@
-*.ini
-*.log
-*.json
+#*.ini
+#*.log
+#*.json
 *.pyc
+__pycache__/*
